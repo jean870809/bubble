@@ -32,7 +32,7 @@ $(function () {
         var cell2 = row.insertCell(1);
         var cell3 = row.insertCell(2);
         cell1.outerHTML = "<th scope='row'>" + (i + 1) + "</th>";
-        cell2.innerHTML = "<td><div class='img-div'><img src='img/" + stock[i] + ".PNG' class='com-img'></div></td>";
+        cell2.innerHTML = "<td><div class='img-div'><img src='img/" + stock[i] + ".png' class='com-img'></div></td>";
         cell3.innerHTML = "<td value =" + stock[i] + ">" + stock[i] + "</td>";
     }
 
