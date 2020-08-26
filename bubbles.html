@@ -61,14 +61,16 @@
             </div>
             <main class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 main" role="main">
                 <div>
-                    <h1 class="h2">Choose your stocks:</h1>
+                    <h1 class="h2" id = "title">Choose your stocks:</h1>
                 </div>
-                <div id="bubbles"></div>
+                <div id=canvas>
+                    <div id="bubbles"></div>
+                </div>
                 <div id="btn">
                     <ul class="flex-nav">
                         <li> <input type="image" name="reset" img src="bubbleimg/reset.png" onClick="reset()"
                                 style="height: 50px; width: 50px;"></li>
-                        <li> <input type="image" name="like" img src="bubbleimg/like.png" onClick=""
+                        <li> <input type="image" name="like" img src="bubbleimg/like.png" onClick="favorites()"
                                 style="height: 50px; width: 50px;"></li>
                         <li> <input type="image" name="more" img src="bubbleimg/more.png" onClick=""
                                 style="height: 50px; width: 50px;"></li>
@@ -79,18 +81,27 @@
     </div>
 
     <script>
+        var stock = [];
+        var price = [];
+        $.get("data.json", function (data) {
+            $.each(data, function (i, item) {
+                stock.push(item.name);
+                price.push(item.price);
+            });
+        }, "json");
+
         var nodes = new vis.DataSet([
-            { id: "AAPL", image: "bubbleimg/AAPL.png" },
-            { id: "AXP", image: "bubbleimg/AXP.png" },
-            { id: "CSCO", image: "bubbleimg/CSCO.png" },
-            { id: "CAT", image: "bubbleimg/CAT.png" },
-            { id: "DIS", image: "bubbleimg/DIS.png" },
-            { id: "HD", image: "bubbleimg/HD.png" },
-            { id: "IBM", image: "bubbleimg/IBM.png" },
-            { id: "KO", image: "bubbleimg/KO.png" },
-            { id: "MCD", image: "bubbleimg/MCD.png" },
-            { id: "MSFT", image: "bubbleimg/MSFT.png" },
-            { id: "V", image: "bubbleimg/V.png" },
+            { id: "AAPL", title: "AAPL", image: "bubbleimg/AAPL.png" },
+            { id: "AXP", title: "AXP", image: "bubbleimg/AXP.png" },
+            { id: "CSCO", title: "CSCO", image: "bubbleimg/CSCO.png" },
+            { id: "CAT", title: "CAT", image: "bubbleimg/CAT.png" },
+            { id: "DIS", title: "DIS", image: "bubbleimg/DIS.png" },
+            { id: "HD", title: "HD", image: "bubbleimg/HD.png" },
+            { id: "IBM", title: "IBM", image: "bubbleimg/IBM.png" },
+            { id: "KO", title: "KO", image: "bubbleimg/KO.png" },
+            { id: "MCD", title: "MCD", image: "bubbleimg/MCD.png" },
+            { id: "MSFT", title: "MSFT", image: "bubbleimg/MSFT.png" },
+            { id: "V", title: "V", image: "bubbleimg/V.png" },
         ]);
         var edges = new vis.DataSet();
 
@@ -109,7 +120,8 @@
                 repulsion: {
                     nodeDistance: 55
                 }
-            }
+            },
+
         };
         var network = new vis.Network(container, data, options);
 
@@ -118,11 +130,11 @@
         network.on("click", function (e) {
             if (e.nodes.length) {
                 var node = nodes.get(e.nodes[0]);
-                if (node.size != 45) {
+                if (node.size != 45) { //選
                     node.size = 45;
                     choose.push(node.id);
                     console.log(choose);
-                } else {
+                } else { //不選
                     node.size = 30;
                     choose.splice(choose.indexOf(node.id), 1);
                     console.log(choose);
@@ -135,6 +147,57 @@
         function reset() {
             choose = [];
             console.log(choose);
+
+        }
+        function favorites() {
+            $('#bubbles').remove();
+            $('#canvas').append('<canvas id="myChart" width="40vh" height="20vh"></canvas>');
+            var img_choose = "";
+            for( i = 0; i < choose.length;i++){
+                img_choose += "<img src='bubbleimg/"+choose[i]+".png' style='height: 50px; width: 50px;'>";
+            }
+            document.getElementById('title').innerHTML = "Your choose: "+img_choose;
+            var ctx = document.getElementById('myChart'); //股價圖
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['DAY1', 'DAY2', 'DAY3', 'DAY4', 'DAY5', 'DAY6', 'DAY7', 'DAY8', 'DAY9', 'DAY10',
+                        'DAY11', 'DAY12', 'DAY13', 'DAY14', 'DAY15', 'DAY16', 'DAY17', 'DAY18', 'DAY19', 'DAY20'],
+                    datasets: []
+                }
+            });
+            for (j = 0; j < choose.length; j++) {
+                for (i = 0; i < stock.length; i++) {
+                    if(choose[j] == stock[i])
+                    myChart.data.datasets.push({
+                        data: price[i],
+                        label: stock[i],
+                        backgroundColor: getbgcolor(),
+                        borderColor: getbdcolor(),
+                        fill: false
+                    });
+                    myChart.update();
+                }
+            }
+        }
+        function more() {
+
+        }
+        function getbgcolor() {
+            var numone = parseInt(Math.random() * (255 + 1), 10);
+            var numtwo = parseInt(Math.random() * (255 + 1), 10);
+            var numthree = parseInt(Math.random() * (255 + 1), 10);
+
+            color = "rgba(" + numone + "," + numtwo + "," + numthree + ",0.2)";
+            return color;
+        }
+        function getbdcolor() {
+            var numone = parseInt(Math.random() * (255 + 1), 10);
+            var numtwo = parseInt(Math.random() * (255 + 1), 10);
+            var numthree = parseInt(Math.random() * (255 + 1), 10);
+
+            color = "rgba(" + numone + "," + numtwo + "," + numthree + ",1)";
+            return color;
         }
     </script>
 </body>
